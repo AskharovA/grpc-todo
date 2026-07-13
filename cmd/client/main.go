@@ -13,20 +13,21 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"grpc-todo/proto_gen"
+	todopb "grpc-todo/proto_gen"
 )
 
 func main() {
 	addr := flag.String("addr", ":50051", "server address")
 	flag.Parse()
 
-	conn, err := grpc.NewClient(*addr,
+	conn, err := grpc.NewClient(
+		*addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	client := todopb.NewTodoServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
